@@ -167,7 +167,12 @@ def get_all_ocorrencias():
 
 @app.route('/ocorrencias/<public_id>', methods=['GET'])
 def get_one_ocorrencia(public_id: str):
-    return ''
+    oc = Ocorrencia.query.filter_by(public_id=public_id).first()
+    if not oc:
+        return jsonify({'message': 'Ocorrencia nao encontrada'})
+    obj = {}
+    obj = ocorrencia_to_json(oc, oc.veiculo, oc.dp)
+    return jsonify({'ocorrencia': obj})
 
 @app.route('/ocorrencias', methods=['POST'])
 def create_ocorrencia():
