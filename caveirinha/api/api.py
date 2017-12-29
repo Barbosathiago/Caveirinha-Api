@@ -155,7 +155,7 @@ def delete_dp(public_id: str):
 
 @app.route('/ocorrencias', methods=['GET'])
 def get_all_ocorrencias():
-    ocorrencias = Ocorrencia.query.options(joinedload('veiculo'))
+    ocorrencias = Ocorrencia.query.all()
 
     output = []
 
