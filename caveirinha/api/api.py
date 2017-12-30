@@ -181,8 +181,17 @@ def get_one_ocorrencia(public_id: str):
 
 @app.route('/ocorrencias', methods=['POST'])
 def create_ocorrencia():
-    data = request.get_json()
-    new_ocorrencia = json_to_ocorrencia(data, str(uuid.uuid4()))
+    ocorrencia = request.get_json()
+    veiculo = Veiculo.query.filter_by(public_id=ocorrencia['veiculo']['public_id']).first()
+    dp = Dp.query.filter_by(public_id=ocorrencia['dp']['public_id']).first()
+    ocorrencia['dp_id'] = dp.id
+    ocorrencia['veiculo_id'] = veiculo.id
+
+    if((not veiculo) or (not dp)):
+        return jsonify({'message': 'Veiculo ou DP nao especificado'})
+
+
+    new_ocorrencia = json_to_ocorrencia(ocorrencia, str(uuid.uuid4()))
     db.session.add(new_ocorrencia)
     db.session.commit()
     return jsonify({'message': 'ocorrencia criada'})
