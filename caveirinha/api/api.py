@@ -239,29 +239,11 @@ def json_to_ocorrencia(ocorrencia: {}, _uuid:str):
     obj.numero = ocorrencia['numero']
     obj.tipoOcorrencia = ocorrencia['tipoOcorrencia']
     obj.situacao = ocorrencia['situacao']
+    obj.veiculo_id = ocorrencia['veiculo_id']
+    obj.dp_id = ocorrencia['dp_id']
 
     if((_uuid != None)):
         obj.public_id = _uuid
-
-    if(ocorrencia['veiculo'] != None):
-        _veiculo = ocorrencia['veiculo']
-        print(_veiculo['public_id'])
-        if (('public_id' in _veiculo) and (_veiculo['public_id'] != None)):
-            veiculo = Veiculo.query.filter_by(public_id=_veiculo['public_id']).first()
-            obj.veiculo_id = veiculo.id
-        else:
-            obj.veiculo = json_to_veiculo(ocorrencia['veiculo'], None)
-            obj.veiculo.public_id =  str(uuid.uuid4())
-
-
-    if(ocorrencia['dp'] != None):
-        _dp = ocorrencia['dp']
-        if (('public_id' in _dp) and (_dp['public_id'] != None)):
-            dp = Dp.query.filter_by(public_id=_dp['public_id']).first()
-            obj.dp_id = dp.id
-        else:
-            obj.dp = json_to_dp(_dp, None)
-            obj.dp.public_id = str(uuid.uuid4())
 
     return obj
 
