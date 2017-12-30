@@ -47,8 +47,8 @@ class Ocorrencia(db.Model):
     veiculo_id = db.Column(db.Integer, db.ForeignKey('veiculo.id'), nullable=False)
     veiculo = db.relationship('Veiculo',uselist=False, backref=db.backref('ocorrencias', lazy=True))
 
-
-@app.route('/veiculo', methods=['GET'])
+# Retorna todos os veículos
+@app.route('/veiculos', methods=['GET'])
 def get_all_veiculos():
     veiculos = Veiculo.query.all()
 
@@ -60,7 +60,8 @@ def get_all_veiculos():
         output.append(obj)
     return jsonify({'veiculos': output})
 
-@app.route('/veiculo/<public_id>', methods=['GET'])
+# Retorna um veículo em especifico
+@app.route('/veiculos/<public_id>', methods=['GET'])
 def get_one_veiculo(public_id: str):
     v = Veiculo.query.filter_by(public_id=public_id).first()
 
@@ -71,7 +72,8 @@ def get_one_veiculo(public_id: str):
     obj = veiculo_to_json(v)
     return jsonify({'veiculo': obj})
 
-@app.route('/veiculo', methods=['POST'])
+# Cria um veículo
+@app.route('/veiculos', methods=['POST'])
 def create_veiculo():
     data = request.get_json()
     new_veiculo = Veiculo()
@@ -81,7 +83,8 @@ def create_veiculo():
 
     return jsonify({'message': 'Veiculo adicionado!'})
 
-@app.route('/veiculo/<public_id>', methods=['PUT'])
+# Atualiza um veículo
+@app.route('/veiculos/<public_id>', methods=['PUT'])
 def update_veiculo(public_id: str):
     data = request.get_json()
     v = Veiculo.query.filter_by(public_id=public_id).first()
@@ -101,7 +104,8 @@ def update_veiculo(public_id: str):
     db.session.commit()
     return jsonify({'message': 'Veiculo atualizado'})
 
-@app.route('/veiculo/<public_id>', methods=['DELETE'])
+# Apaga um veículo
+@app.route('/veiculos/<public_id>', methods=['DELETE'])
 def delete_veiculo(public_id: str):
     data = request.get_json()
     v = Veiculo.query.filter_by(public_id=public_id).first()
@@ -112,7 +116,8 @@ def delete_veiculo(public_id: str):
     db.session.commit()
     return jsonify({'message': 'Veiculo deletado'})
 
-@app.route('/dp', methods=['GET'])
+# Retorna todas as DPs
+@app.route('/dps', methods=['GET'])
 def get_all_dps():
     dps = Dp.query.all()
 
@@ -124,7 +129,8 @@ def get_all_dps():
         output.append(obj)
     return jsonify({'dps': output})
 
-@app.route('/dp/<public_id>', methods=['GET'])
+# Retorna uma DP específica
+@app.route('/dps/<public_id>', methods=['GET'])
 def get_one_dp(public_id: str):
     d = Dp.query.filter_by(public_id=public_id).first()
     if not d:
@@ -134,7 +140,8 @@ def get_one_dp(public_id: str):
     obj = dp_to_json(d)
     return jsonify({'dp': obj})
 
-@app.route('/dp', methods=['POST'])
+# Cria uma DP
+@app.route('/dps', methods=['POST'])
 def create_dp():
     data = request.get_json()
     new_dp = Dp()
@@ -143,7 +150,8 @@ def create_dp():
     db.session.commit()
     return jsonify({'message': 'Dp adicionada!'})
 
-@app.route('/dp/<public_id>', methods=['PUT'])
+# Atualiza uma DP
+@app.route('/dps/<public_id>', methods=['PUT'])
 def update_dp(public_id: str):
     data = request.get_json()
     d = Dp.query.filter_by(public_id=public_id).first()
@@ -154,10 +162,11 @@ def update_dp(public_id: str):
     db.session.commit()
     return jsonify({'message': 'Dp atualizada'})
 
-@app.route('/dp/<public_id>', methods=['DELETE'])
+# Apaga uma DP
+@app.route('/dps/<public_id>', methods=['DELETE'])
 def delete_dp(public_id: str):
     return ''
-
+# Retorna todas as ocorrências
 @app.route('/ocorrencias', methods=['GET'])
 def get_all_ocorrencias():
     ocorrencias = Ocorrencia.query.all()
@@ -170,6 +179,7 @@ def get_all_ocorrencias():
         output.append(oc_data)
     return jsonify({'ocorrencias':output})
 
+# Retorna uma ocorrência específica
 @app.route('/ocorrencias/<public_id>', methods=['GET'])
 def get_one_ocorrencia(public_id: str):
     oc = Ocorrencia.query.filter_by(public_id=public_id).first()
@@ -179,6 +189,7 @@ def get_one_ocorrencia(public_id: str):
     obj = ocorrencia_to_json(oc, oc.veiculo, oc.dp)
     return jsonify({'ocorrencia': obj})
 
+# Cria uma ocorrência
 @app.route('/ocorrencias', methods=['POST'])
 def create_ocorrencia():
     ocorrencia = request.get_json()
@@ -196,6 +207,7 @@ def create_ocorrencia():
     db.session.commit()
     return jsonify({'message': 'ocorrencia criada'})
 
+# Atualiza uma ocorrência
 @app.route('/ocorrencias/<public_id>', methods=['PUT'])
 def update_ocorrencia(public_id: str):
     ocorrencia = request.get_json()
@@ -220,6 +232,10 @@ def update_ocorrencia(public_id: str):
 
     return jsonify({'message': 'Ocorrencia atualizada'})
 
+
+# Helper Methods
+
+# Traduz uma ocorrencia para JSON
 def ocorrencia_to_json(ocorrencia:Ocorrencia, veiculo:Veiculo, dp: Dp):
     obj = {}
     obj['public_id'] = ocorrencia.public_id
@@ -232,6 +248,7 @@ def ocorrencia_to_json(ocorrencia:Ocorrencia, veiculo:Veiculo, dp: Dp):
     obj['veiculo'] = veiculo_to_json(veiculo)
     return obj
 
+# Traduz um JSON para uma ocorrência
 def json_to_ocorrencia(ocorrencia: {}, _uuid:str):
     obj = Ocorrencia()
 
@@ -248,6 +265,7 @@ def json_to_ocorrencia(ocorrencia: {}, _uuid:str):
 
     return obj
 
+# Traduz um veículo para JSON
 def veiculo_to_json(veiculo:Veiculo):
     obj = {}
     obj['public_id'] = veiculo.public_id
@@ -261,6 +279,7 @@ def veiculo_to_json(veiculo:Veiculo):
     obj['telefoneProprietario'] = veiculo.telefoneProprietario
     return obj
 
+# Traduz um JSON para um veículo
 def json_to_veiculo(data: {}, _uuid:str):
     new_veiculo = Veiculo()
 
@@ -278,12 +297,14 @@ def json_to_veiculo(data: {}, _uuid:str):
 
     return new_veiculo
 
+# Traduz uma DP para JSOn
 def dp_to_json(dp: Dp):
     obj = {}
     obj['public_id'] = dp.public_id
     obj['nome'] = dp.nome
     return obj
 
+# Traduz um JSON para uma DP
 def json_to_dp(data: {}, _uuid: str):
     dp = Dp()
 
