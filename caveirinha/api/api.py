@@ -198,23 +198,24 @@ def create_ocorrencia():
 
 @app.route('/ocorrencias/<public_id>', methods=['PUT'])
 def update_ocorrencia(public_id: str):
-    data = request.get_json()
-    print(data)
+    ocorrencia = request.get_json()
     oc = Ocorrencia()
+    veiculo = Veiculo.query.filter_by(public_id=ocorrencia['veiculo']['public_id']).first()
+    dp = Dp.query.filter_by(public_id=ocorrencia['dp']['public_id']).first()
+    if((not veiculo) or (not dp)):
+        return jsonify({'message': 'Veiculo ou DP não encontrados'})
     oc = Ocorrencia.query.filter_by(public_id=public_id).first()
+
     if not oc:
         return jsonify({'message': 'Ocorrencia nao encontrada'})
-    oc.rua = data['rua']
-    oc.bairro = data['bairro']
-    oc.numero = data['numero']
+    oc.rua = ocorrencia['rua']
+    oc.bairro = ocorrencia['bairro']
+    oc.numero = ocorrencia['numero']
+    oc.tipoOcorrencia = ocorrencia['tipoOcorrencia']
+    oc.situacao = ocorrencia['situacao']
+    oc.veiculo_id = veiculo.id
+    oc.dp_id = dp.id
 
-    # oc.dp = json_to_dp(data['dp'],None)
-    oc.tipoOcorrencia = data['tipoOcorrencia']
-    oc.situacao = data['situacao']
-    # oc.veiculo = json_to_veiculo(data['veiculo'], None)
-    # _v = data['veiculo']
-    # _veiculo = Veiculo.query.filter_by(public_id=_v['public_id']).first()
-    # oc.veiculo_id = _veiculo.id
     db.session.commit()
 
     return jsonify({'message': 'Ocorrencia atualizada'})
