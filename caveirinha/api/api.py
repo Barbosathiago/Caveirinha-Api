@@ -4,14 +4,17 @@ from sqlalchemy.orm import joinedload
 import uuid
 import json
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 app.config['SECRET_KEY'] = 'thisissecret'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/itsadeadh2/Develop/flask/api/cav.db'
 
 db = SQLAlchemy(app)
 
+# Model de veiculo
 class Veiculo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(50), unique=True)
@@ -24,11 +27,13 @@ class Veiculo(db.Model):
     nomeProprietario = db.Column(db.String(450))
     telefoneProprietario = db.Column(db.String(80))
 
+# Model de Dp's
 class Dp(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(50), unique=True)
     nome = db.Column(db.String(120))
 
+# Model de Ocorrencias
 class Ocorrencia(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(50), unique=True)
@@ -226,12 +231,13 @@ def json_to_ocorrencia(ocorrencia: {}, _uuid:str):
     obj.tipoOcorrencia = ocorrencia['tipoOcorrencia']
     obj.situacao = ocorrencia['situacao']
 
-    if(_uuid != None):
+    if((_uuid != None)):
         obj.public_id = _uuid
 
     if(ocorrencia['veiculo'] != None):
         _veiculo = ocorrencia['veiculo']
-        if 'public_id' in _veiculo:
+        print(_veiculo['public_id'])
+        if (('public_id' in _veiculo) and (_veiculo['public_id'] != None)):
             veiculo = Veiculo.query.filter_by(public_id=_veiculo['public_id']).first()
             obj.veiculo_id = veiculo.id
         else:
@@ -241,7 +247,7 @@ def json_to_ocorrencia(ocorrencia: {}, _uuid:str):
 
     if(ocorrencia['dp'] != None):
         _dp = ocorrencia['dp']
-        if 'public_id' in _dp:
+        if (('public_id' in _dp) and (_dp['public_id'] != None)):
             dp = Dp.query.filter_by(public_id=_dp['public_id']).first()
             obj.dp_id = dp.id
         else:
@@ -275,7 +281,7 @@ def json_to_veiculo(data: {}, _uuid:str):
     new_veiculo.nomeProprietario=data['nomeProprietario']
     new_veiculo.telefoneProprietario=data['telefoneProprietario']
 
-    if(_uuid != None):
+    if((_uuid != None)):
         new_veiculo.public_id=_uuid
 
     return new_veiculo
@@ -290,7 +296,7 @@ def json_to_dp(data: {}, _uuid: str):
     dp = Dp()
 
     dp.nome = data['nome']
-    if(_uuid != None):
+    if((_uuid != None) or (_uuid == 'null')):
         dp.public_id=_uuid
     return dp
 
