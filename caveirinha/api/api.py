@@ -79,9 +79,10 @@ def create_veiculo():
     new_veiculo = Veiculo()
     new_veiculo = json_to_veiculo(data,str(uuid.uuid4()))
     db.session.add(new_veiculo)
+    db.session.flush()
     db.session.commit()
 
-    return jsonify({'message': 'Veiculo adicionado!'})
+    return jsonify({'message': 'Veiculo registrado!', 'public_id': new_veiculo.public_id})
 
 # Atualiza um veículo
 @app.route('/veiculos/<public_id>', methods=['PUT'])
@@ -148,7 +149,8 @@ def create_dp():
     new_dp = json_to_dp(data, str(uuid.uuid4()))
     db.session.add(new_dp)
     db.session.commit()
-    return jsonify({'message': 'Dp adicionada!'})
+    db.session.flush()
+    return jsonify({'message': 'Dp adicionada!', 'public_id': new_dp.public_id})
 
 # Atualiza uma DP
 @app.route('/dps/<public_id>', methods=['PUT'])
@@ -204,8 +206,9 @@ def create_ocorrencia():
 
     new_ocorrencia = json_to_ocorrencia(ocorrencia, str(uuid.uuid4()))
     db.session.add(new_ocorrencia)
+    db.session.flush()
     db.session.commit()
-    return jsonify({'message': 'ocorrencia criada'})
+    return jsonify({'message': 'ocorrencia criada', 'public_id': new_ocorrencia.public_id})
 
 # Atualiza uma ocorrência
 @app.route('/ocorrencias/<public_id>', methods=['PUT'])
