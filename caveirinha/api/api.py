@@ -148,6 +148,21 @@ def create_proprietario():
     db.session.flush()
     db.session.commit()
     return jsonify({'message': 'Proprietario registrado!', 'public_id': new_prop.public_id})
+
+@app.route('/proprietarios/<public_id>', methods=['PUT'])
+def update_proprietario(public_id: str):
+    data = request.get_json()
+    prop = Proprietario.query.filter_by(public_id=public_id).first()
+
+    if not prop:
+        return jsonify({'message': 'Proprietario nao encontrado.'})
+
+    prop.nome= data['nome']
+    prop.contato = data['contato']
+
+    db.session.commit()
+    return jsonify({'message': 'Proprietario atualizado!'})
+
 # Retorna todas as DPs
 @app.route('/dps', methods=['GET'])
 def get_all_dps():
