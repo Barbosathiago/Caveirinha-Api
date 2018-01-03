@@ -202,7 +202,32 @@ def delete_dp(public_id: str):
 # Retorna todas as ocorrências
 @app.route('/ocorrencias', methods=['GET'])
 def get_all_ocorrencias():
-    ocorrencias = Ocorrencia.query.all()
+    ocorrencias = []
+    placa = request.args.get('placa')
+    if not placa:
+        placa = ''
+    numeroMotor = request.args.get('numeroMotor')
+    if not numeroMotor:
+        numeroMotor = ''
+    chassis = request.args.get('chassis')
+    if not chassis:
+        chassis = ''
+    situacao = request.args.get('situacao')
+    if not situacao:
+        ocorrencias = db.session.query(Ocorrencia).join(Veiculo, Ocorrencia.veiculo).\
+        filter(Veiculo.placa.like("%"+placa+"%")).\
+        filter(Veiculo.numeroMotor.like("%"+numeroMotor+"%")).\
+        filter(Veiculo.chassis.like("%"+chassis+"%"))
+    else:
+        ocorrencias = db.session.query(Ocorrencia).join(Veiculo, Ocorrencia.veiculo).\
+        filter(Veiculo.placa.like("%"+placa+"%")).\
+        filter(Veiculo.numeroMotor.like("%"+numeroMotor+"%")).\
+        filter(Veiculo.chassis.like("%"+chassis+"%")).\
+        filter(Ocorrencia.situacao=='PENDENTE')
+    print(placa)
+    # ocorrencias = Ocorrencia.query.filter_by(Ocorrencia.veiculo.placa.like("%"+placa+"%")).all()
+
+
 
     output = []
 
