@@ -5,6 +5,7 @@ import uuid
 import json
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -14,18 +15,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/itsadeadh2/Develop/flas
 
 db = SQLAlchemy(app)
 
-# Model de veiculo
-class Veiculo(db.Model):
+# Model de proprietário
+class Proprietario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(50), unique=True)
-    placa = db.Column(db.String(8))
-    chassis = db.Column(db.String(120))
-    numeroMotor = db.Column(db.String(15))
-    cor = db.Column(db.String(50))
-    tipoVeiculo = db.Column(db.String(50))
-    descricao = db.Column(db.String(450))
-    nomeProprietario = db.Column(db.String(450))
-    telefoneProprietario = db.Column(db.String(80))
+    nome = db.Column(db.String(120))
+    contato = db.Column(db.String(25))
 
 # Model de Dp's
 class Dp(db.Model):
@@ -33,19 +28,33 @@ class Dp(db.Model):
     public_id = db.Column(db.String(50), unique=True)
     nome = db.Column(db.String(120))
 
+# Model de veiculo
+class Veiculo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    public_id = db.Column(db.String(50), unique=True)
+    placa = db.Column(db.String(8))
+    tipo = db.Column(db.String(50))
+    ano = db.Column(db.String(12))
+    chassis = db.Column(db.String(120))
+    numeroMotor = db.Column(db.String(15))
+    cor = db.Column(db.String(50))
+    proprietario_id = db.Column(db.Integer, db.ForeignKey('proprietario.id'), nullable=False)
+    proprietario = db.relationship('Proprietario', uselist=False, backref=db.backref('veiculo', lazy=True))
+
 # Model de Ocorrencias
 class Ocorrencia(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(50), unique=True)
-    rua = db.Column(db.String(250))
-    bairro = db.Column(db.String(250))
-    numero = db.Column(db.String(250))
+    numeroOcorrencia = db.Column(db.String(50), unique=True)
+    localOcorrencia = db.Column(db.String(450))
     dp_id = db.Column(db.Integer, db.ForeignKey('dp.id'), nullable=False)
     dp = db.relationship('Dp', uselist=False, backref=db.backref('ocorrencias', lazy=True))
     tipoOcorrencia = db.Column(db.String(50))
+    observacoes = db.Column(db.String(450))
     situacao = db.Column(db.String(50))
     veiculo_id = db.Column(db.Integer, db.ForeignKey('veiculo.id'), nullable=False)
     veiculo = db.relationship('Veiculo',uselist=False, backref=db.backref('ocorrencias', lazy=True))
+    data = db.Column(db.Date())
 
 # Retorna todos os veículos
 @app.route('/veiculos', methods=['GET'])
@@ -76,12 +85,19 @@ def get_one_veiculo(public_id: str):
 @app.route('/veiculos', methods=['POST'])
 def create_veiculo():
     data = request.get_json()
+    print(data['proprietario']['public_id'])
+    proprietario = Proprietario.query.filter_by(public_id=data['proprietario']['public_id']).first()
+    if not proprietario:
+        return jsonify({'message': 'Proprietário nao especificado!'})
+
+    data['proprietario_id'] = proprietario.id
     new_veiculo = Veiculo()
     new_veiculo = json_to_veiculo(data,str(uuid.uuid4()))
     db.session.add(new_veiculo)
+    db.session.flush()
     db.session.commit()
 
-    return jsonify({'message': 'Veiculo adicionado!'})
+    return jsonify({'message': 'Veiculo registrado!', 'public_id': new_veiculo.public_id})
 
 # Atualiza um veículo
 @app.route('/veiculos/<public_id>', methods=['PUT'])
@@ -116,6 +132,65 @@ def delete_veiculo(public_id: str):
     db.session.commit()
     return jsonify({'message': 'Veiculo deletado'})
 
+@app.route('/proprietarios', methods=['GET'])
+def get_all_proprietarios():
+    proprietarios = Proprietario.query.all()
+    print(proprietarios)
+
+    output = []
+
+    for prop in proprietarios:
+        obj = {}
+        obj = proprietario_to_json(prop)
+        output.append(obj)
+    return jsonify({'proprietaraios': output})
+
+@app.route('/proprietarios/<public_id>', methods=['GET'])
+def get_one_proprietarios(public_id: str):
+    prop = Proprietario.query.filter_by(public_id=public_id).first()
+
+    if not prop:
+        return jsonify({'message': 'Proprietario nao encontrado.'})
+
+    obj = {}
+    obj = proprietario_to_json(prop)
+    return jsonify({'proprietario': obj})
+
+@app.route('/proprietarios', methods=['POST'])
+def create_proprietario():
+    data = request.get_json()
+    new_prop = Proprietario()
+    new_prop = json_to_proprietario(data, str(uuid.uuid4()))
+    db.session.add(new_prop)
+    db.session.flush()
+    db.session.commit()
+    return jsonify({'message': 'Proprietario registrado!', 'public_id': new_prop.public_id})
+
+@app.route('/proprietarios/<public_id>', methods=['PUT'])
+def update_proprietario(public_id: str):
+    data = request.get_json()
+    prop = Proprietario.query.filter_by(public_id=public_id).first()
+
+    if not prop:
+        return jsonify({'message': 'Proprietario nao encontrado.'})
+
+    prop.nome= data['nome']
+    prop.contato = data['contato']
+
+    db.session.commit()
+    return jsonify({'message': 'Proprietario atualizado!'})
+
+@app.route('/proprietarios/<public_id>', methods=['DELETE'])
+def delete_proprietario(public_id):
+    data = request.get_json()
+    prop = Proprietario.query.filter_by(public_id=public_id).first()
+
+    if not prop:
+        return jsonify({'message': 'Proprietario nao encontrado.'})
+    db.session.delete(prop)
+    db.session.commit()
+    return jsonify({'message': 'Proprietario deletado'})
+
 # Retorna todas as DPs
 @app.route('/dps', methods=['GET'])
 def get_all_dps():
@@ -148,7 +223,8 @@ def create_dp():
     new_dp = json_to_dp(data, str(uuid.uuid4()))
     db.session.add(new_dp)
     db.session.commit()
-    return jsonify({'message': 'Dp adicionada!'})
+    db.session.flush()
+    return jsonify({'message': 'Dp adicionada!', 'public_id': new_dp.public_id})
 
 # Atualiza uma DP
 @app.route('/dps/<public_id>', methods=['PUT'])
@@ -169,7 +245,32 @@ def delete_dp(public_id: str):
 # Retorna todas as ocorrências
 @app.route('/ocorrencias', methods=['GET'])
 def get_all_ocorrencias():
-    ocorrencias = Ocorrencia.query.all()
+    ocorrencias = []
+    placa = request.args.get('placa')
+    if not placa:
+        placa = ''
+    numeroMotor = request.args.get('numeroMotor')
+    if not numeroMotor:
+        numeroMotor = ''
+    chassis = request.args.get('chassis')
+    if not chassis:
+        chassis = ''
+    situacao = request.args.get('situacao')
+    if not situacao:
+        ocorrencias = db.session.query(Ocorrencia).join(Veiculo, Ocorrencia.veiculo).\
+        filter(Veiculo.placa.like("%"+placa+"%")).\
+        filter(Veiculo.numeroMotor.like("%"+numeroMotor+"%")).\
+        filter(Veiculo.chassis.like("%"+chassis+"%"))
+    else:
+        ocorrencias = db.session.query(Ocorrencia).join(Veiculo, Ocorrencia.veiculo).\
+        filter(Veiculo.placa.like("%"+placa+"%")).\
+        filter(Veiculo.numeroMotor.like("%"+numeroMotor+"%")).\
+        filter(Veiculo.chassis.like("%"+chassis+"%")).\
+        filter(Ocorrencia.situacao=='PENDENTE')
+    print(placa)
+    # ocorrencias = Ocorrencia.query.filter_by(Ocorrencia.veiculo.placa.like("%"+placa+"%")).all()
+
+
 
     output = []
 
@@ -204,8 +305,9 @@ def create_ocorrencia():
 
     new_ocorrencia = json_to_ocorrencia(ocorrencia, str(uuid.uuid4()))
     db.session.add(new_ocorrencia)
+    db.session.flush()
     db.session.commit()
-    return jsonify({'message': 'ocorrencia criada'})
+    return jsonify({'message': 'ocorrencia criada', 'public_id': new_ocorrencia.public_id})
 
 # Atualiza uma ocorrência
 @app.route('/ocorrencias/<public_id>', methods=['PUT'])
@@ -220,14 +322,15 @@ def update_ocorrencia(public_id: str):
 
     if not oc:
         return jsonify({'message': 'Ocorrencia nao encontrada'})
-    oc.rua = ocorrencia['rua']
-    oc.bairro = ocorrencia['bairro']
-    oc.numero = ocorrencia['numero']
     oc.tipoOcorrencia = ocorrencia['tipoOcorrencia']
     oc.situacao = ocorrencia['situacao']
+    oc.numeroOcorrencia = ocorrencia['numeroOcorrencia']
+    oc.localOcorrencia = ocorrencia['localOcorrencia']
+    oc.data = datetime.strptime(ocorrencia['data'],'%Y-%m-%d').date()
+    oc.observacoes = data['observacoes']
     oc.veiculo_id = veiculo.id
     oc.dp_id = dp.id
-
+    db.session.flush()
     db.session.commit()
 
     return jsonify({'message': 'Ocorrencia atualizada'})
@@ -239,26 +342,28 @@ def update_ocorrencia(public_id: str):
 def ocorrencia_to_json(ocorrencia:Ocorrencia, veiculo:Veiculo, dp: Dp):
     obj = {}
     obj['public_id'] = ocorrencia.public_id
-    obj['rua'] = ocorrencia.rua
-    obj['bairro'] = ocorrencia.bairro
-    obj['numero'] = ocorrencia.numero
     obj['dp'] = dp_to_json(dp)
     obj['tipoOcorrencia'] = ocorrencia.tipoOcorrencia
     obj['situacao'] = ocorrencia.situacao
     obj['veiculo'] = veiculo_to_json(veiculo)
+    obj['data']= ocorrencia.data
+    obj['numeroOcorrencia'] = ocorrencia.numeroOcorrencia
+    obj['localOcorrencia'] = ocorrencia.localOcorrencia
+    obj['observacoes'] = ocorrencia.observacoes
     return obj
 
 # Traduz um JSON para uma ocorrência
 def json_to_ocorrencia(ocorrencia: {}, _uuid:str):
     obj = Ocorrencia()
 
-    obj.rua = ocorrencia['rua']
-    obj.bairro = ocorrencia['bairro']
-    obj.numero = ocorrencia['numero']
     obj.tipoOcorrencia = ocorrencia['tipoOcorrencia']
     obj.situacao = ocorrencia['situacao']
     obj.veiculo_id = ocorrencia['veiculo_id']
     obj.dp_id = ocorrencia['dp_id']
+    obj.numeroOcorrencia = ocorrencia['numeroOcorrencia']
+    localOcorrencia = ocorrencia['localOcorrencia']
+    obj.data = datetime.strptime(ocorrencia['data'],'%Y-%m-%d').date()
+    obj.observacoes = ocorrencia['observacoes']
 
     if((_uuid != None)):
         obj.public_id = _uuid
@@ -273,10 +378,10 @@ def veiculo_to_json(veiculo:Veiculo):
     obj['chassis'] = veiculo.chassis
     obj['numeroMotor'] = veiculo.numeroMotor
     obj['cor'] = veiculo.cor
-    obj['tipoVeiculo'] = veiculo.tipoVeiculo
-    obj['descricao'] = veiculo.descricao
-    obj['nomeProprietario'] = veiculo.nomeProprietario
-    obj['telefoneProprietario'] = veiculo.telefoneProprietario
+    obj['proprietario'] = proprietario_to_json(veiculo.proprietario)
+    obj['tipo'] = veiculo.tipo
+    obj['ano'] = veiculo.ano
+
     return obj
 
 # Traduz um JSON para um veículo
@@ -287,10 +392,9 @@ def json_to_veiculo(data: {}, _uuid:str):
     new_veiculo.chassis=data['chassis']
     new_veiculo.numeroMotor=data['numeroMotor']
     new_veiculo.cor=data['cor']
-    new_veiculo.tipoVeiculo=data['tipoVeiculo']
-    new_veiculo.descricao=data['descricao']
-    new_veiculo.nomeProprietario=data['nomeProprietario']
-    new_veiculo.telefoneProprietario=data['telefoneProprietario']
+    new_veiculo.proprietario_id=data['proprietario_id']
+    new_veiculo.tipo=data['tipo']
+    new_veiculo.ano=data['ano']
 
     if((_uuid != None)):
         new_veiculo.public_id=_uuid
@@ -309,11 +413,27 @@ def json_to_dp(data: {}, _uuid: str):
     dp = Dp()
 
     dp.nome = data['nome']
-    if((_uuid != None) or (_uuid == 'null')):
+    if((_uuid != None)):
         dp.public_id=_uuid
     return dp
 
+# Traduz um Proprietario para JSON
+def proprietario_to_json(prop: Proprietario):
+    obj = {}
+    obj['public_id'] = prop.public_id
+    obj['nome'] = prop.nome
+    obj['contato'] = prop.contato
+    return obj
 
+# Traduz um JSON para um Proprietário
+def json_to_proprietario(data: {}, _uuid: str):
+    prop = Proprietario()
+
+    prop.nome = data['nome']
+    prop.contato = data['contato']
+    if((_uuid!= None)):
+        prop.public_id = _uuid
+    return prop
 
 if __name__ == '__main__':
     app.run(debug=True)
