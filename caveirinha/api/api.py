@@ -5,6 +5,7 @@ import uuid
 import json
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -14,18 +15,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/itsadeadh2/Develop/flas
 
 db = SQLAlchemy(app)
 
-# Model de veiculo
-class Veiculo(db.Model):
+# Model de proprietário
+class Proprietario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(50), unique=True)
-    placa = db.Column(db.String(8))
-    chassis = db.Column(db.String(120))
-    numeroMotor = db.Column(db.String(15))
-    cor = db.Column(db.String(50))
-    tipoVeiculo = db.Column(db.String(50))
-    descricao = db.Column(db.String(450))
-    nomeProprietario = db.Column(db.String(450))
-    telefoneProprietario = db.Column(db.String(80))
+    nome = db.Column(db.String(120))
+    contato = db.Column(db.String(25))
 
 # Model de Dp's
 class Dp(db.Model):
@@ -33,19 +28,33 @@ class Dp(db.Model):
     public_id = db.Column(db.String(50), unique=True)
     nome = db.Column(db.String(120))
 
+# Model de veiculo
+class Veiculo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    public_id = db.Column(db.String(50), unique=True)
+    placa = db.Column(db.String(8))
+    tipo = db.Column(db.String(12))
+    ano = db.Column(db.String(12))
+    chassis = db.Column(db.String(120))
+    numeroMotor = db.Column(db.String(15))
+    cor = db.Column(db.String(50))
+    tipoVeiculo = db.Column(db.String(50))
+    proprietario_id = db.Column(db.Integer, db.ForeignKey('proprietario.id'), nullable=False)
+    proprietario = db.relationship('Proprietario', uselist=False, backref=db.backref('veiculo', lazy=True))
+
 # Model de Ocorrencias
 class Ocorrencia(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(50), unique=True)
-    rua = db.Column(db.String(250))
-    bairro = db.Column(db.String(250))
-    numero = db.Column(db.String(250))
+    numeroOcorrencia = db.Column(db.String(50), unique=True)
+    localOcorrencia = db.Column(db.String(450))
     dp_id = db.Column(db.Integer, db.ForeignKey('dp.id'), nullable=False)
     dp = db.relationship('Dp', uselist=False, backref=db.backref('ocorrencias', lazy=True))
     tipoOcorrencia = db.Column(db.String(50))
     situacao = db.Column(db.String(50))
     veiculo_id = db.Column(db.Integer, db.ForeignKey('veiculo.id'), nullable=False)
     veiculo = db.relationship('Veiculo',uselist=False, backref=db.backref('ocorrencias', lazy=True))
+    data = db.Column(db.Date())
 
 # Retorna todos os veículos
 @app.route('/veiculos', methods=['GET'])
