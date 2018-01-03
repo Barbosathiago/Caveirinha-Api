@@ -287,6 +287,7 @@ def update_ocorrencia(public_id: str):
     oc.veiculo_id = veiculo.id
     oc.dp_id = dp.id
 
+    db.session.flush()
     db.session.commit()
 
     return jsonify({'message': 'Ocorrencia atualizada'})
@@ -305,6 +306,7 @@ def ocorrencia_to_json(ocorrencia:Ocorrencia, veiculo:Veiculo, dp: Dp):
     obj['tipoOcorrencia'] = ocorrencia.tipoOcorrencia
     obj['situacao'] = ocorrencia.situacao
     obj['veiculo'] = veiculo_to_json(veiculo)
+    obj['data']= ocorrencia.data
     return obj
 
 # Traduz um JSON para uma ocorrência
@@ -318,6 +320,7 @@ def json_to_ocorrencia(ocorrencia: {}, _uuid:str):
     obj.situacao = ocorrencia['situacao']
     obj.veiculo_id = ocorrencia['veiculo_id']
     obj.dp_id = ocorrencia['dp_id']
+    obj.data = datetime.strptime(ocorrencia['data'],'%Y-%m-%d').date()
 
     if((_uuid != None)):
         obj.public_id = _uuid
