@@ -342,28 +342,28 @@ def update_ocorrencia(public_id: str):
 def ocorrencia_to_json(ocorrencia:Ocorrencia, veiculo:Veiculo, dp: Dp):
     obj = {}
     obj['public_id'] = ocorrencia.public_id
-    obj['rua'] = ocorrencia.rua
-    obj['bairro'] = ocorrencia.bairro
-    obj['numero'] = ocorrencia.numero
     obj['dp'] = dp_to_json(dp)
     obj['tipoOcorrencia'] = ocorrencia.tipoOcorrencia
     obj['situacao'] = ocorrencia.situacao
     obj['veiculo'] = veiculo_to_json(veiculo)
     obj['data']= ocorrencia.data
+    obj['numeroOcorrencia'] = ocorrencia.numeroOcorrencia
+    obj['localOcorrencia'] = ocorrencia.localOcorrencia
+    obj['observacoes'] = ocorrencia.observacoes
     return obj
 
 # Traduz um JSON para uma ocorrência
 def json_to_ocorrencia(ocorrencia: {}, _uuid:str):
     obj = Ocorrencia()
 
-    obj.rua = ocorrencia['rua']
-    obj.bairro = ocorrencia['bairro']
-    obj.numero = ocorrencia['numero']
     obj.tipoOcorrencia = ocorrencia['tipoOcorrencia']
     obj.situacao = ocorrencia['situacao']
     obj.veiculo_id = ocorrencia['veiculo_id']
     obj.dp_id = ocorrencia['dp_id']
+    obj.numeroOcorrencia = ocorrencia['numeroOcorrencia']
+    localOcorrencia = ocorrencia['localOcorrencia']
     obj.data = datetime.strptime(ocorrencia['data'],'%Y-%m-%d').date()
+    obj.observacoes = ocorrencia['observacoes']
 
     if((_uuid != None)):
         obj.public_id = _uuid
