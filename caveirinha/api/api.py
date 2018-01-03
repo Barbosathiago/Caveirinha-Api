@@ -337,8 +337,10 @@ def veiculo_to_json(veiculo:Veiculo):
     obj['cor'] = veiculo.cor
     obj['tipoVeiculo'] = veiculo.tipoVeiculo
     obj['descricao'] = veiculo.descricao
-    obj['nomeProprietario'] = veiculo.nomeProprietario
-    obj['telefoneProprietario'] = veiculo.telefoneProprietario
+    obj['proprietario'] = veiculo.proprietario
+    obj['tipo'] = veiculo.tipo
+    obj['ano'] = veiculo.ano
+
     return obj
 
 # Traduz um JSON para um veículo
@@ -351,8 +353,9 @@ def json_to_veiculo(data: {}, _uuid:str):
     new_veiculo.cor=data['cor']
     new_veiculo.tipoVeiculo=data['tipoVeiculo']
     new_veiculo.descricao=data['descricao']
-    new_veiculo.nomeProprietario=data['nomeProprietario']
-    new_veiculo.telefoneProprietario=data['telefoneProprietario']
+    new_veiculo.proprietario_id=data['proprietario_id']
+    new_veiculo.tipo=data['tipo']
+    new_veiculo.ano=data['ano']
 
     if((_uuid != None)):
         new_veiculo.public_id=_uuid
