@@ -33,12 +33,11 @@ class Veiculo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(50), unique=True)
     placa = db.Column(db.String(8))
-    tipo = db.Column(db.String(12))
+    tipo = db.Column(db.String(50))
     ano = db.Column(db.String(12))
     chassis = db.Column(db.String(120))
     numeroMotor = db.Column(db.String(15))
     cor = db.Column(db.String(50))
-    tipoVeiculo = db.Column(db.String(50))
     proprietario_id = db.Column(db.Integer, db.ForeignKey('proprietario.id'), nullable=False)
     proprietario = db.relationship('Proprietario', uselist=False, backref=db.backref('veiculo', lazy=True))
 
