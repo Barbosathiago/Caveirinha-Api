@@ -50,6 +50,7 @@ class Ocorrencia(db.Model):
     dp_id = db.Column(db.Integer, db.ForeignKey('dp.id'), nullable=False)
     dp = db.relationship('Dp', uselist=False, backref=db.backref('ocorrencias', lazy=True))
     tipoOcorrencia = db.Column(db.String(50))
+    observacoes = db.Column(db.String(450))
     situacao = db.Column(db.String(50))
     veiculo_id = db.Column(db.Integer, db.ForeignKey('veiculo.id'), nullable=False)
     veiculo = db.relationship('Veiculo',uselist=False, backref=db.backref('ocorrencias', lazy=True))
