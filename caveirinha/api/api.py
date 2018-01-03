@@ -371,9 +371,7 @@ def veiculo_to_json(veiculo:Veiculo):
     obj['chassis'] = veiculo.chassis
     obj['numeroMotor'] = veiculo.numeroMotor
     obj['cor'] = veiculo.cor
-    obj['tipoVeiculo'] = veiculo.tipoVeiculo
-    obj['descricao'] = veiculo.descricao
-    obj['proprietario'] = veiculo.proprietario
+    obj['proprietario'] = proprietario_to_json(veiculo.proprietario)
     obj['tipo'] = veiculo.tipo
     obj['ano'] = veiculo.ano
 
@@ -387,8 +385,6 @@ def json_to_veiculo(data: {}, _uuid:str):
     new_veiculo.chassis=data['chassis']
     new_veiculo.numeroMotor=data['numeroMotor']
     new_veiculo.cor=data['cor']
-    new_veiculo.tipoVeiculo=data['tipoVeiculo']
-    new_veiculo.descricao=data['descricao']
     new_veiculo.proprietario_id=data['proprietario_id']
     new_veiculo.tipo=data['tipo']
     new_veiculo.ano=data['ano']
