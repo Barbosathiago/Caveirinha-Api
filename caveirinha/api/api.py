@@ -322,14 +322,14 @@ def update_ocorrencia(public_id: str):
 
     if not oc:
         return jsonify({'message': 'Ocorrencia nao encontrada'})
-    oc.rua = ocorrencia['rua']
-    oc.bairro = ocorrencia['bairro']
-    oc.numero = ocorrencia['numero']
     oc.tipoOcorrencia = ocorrencia['tipoOcorrencia']
     oc.situacao = ocorrencia['situacao']
+    oc.numeroOcorrencia = ocorrencia['numeroOcorrencia']
+    oc.localOcorrencia = ocorrencia['localOcorrencia']
+    oc.data = datetime.strptime(ocorrencia['data'],'%Y-%m-%d').date()
+    oc.observacoes = data['observacoes']
     oc.veiculo_id = veiculo.id
     oc.dp_id = dp.id
-
     db.session.flush()
     db.session.commit()
 
