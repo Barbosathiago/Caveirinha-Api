@@ -139,6 +139,17 @@ def get_all_proprietarios():
         output.append(obj)
     return jsonify({'proprietaraios': output})
 
+@app.route('/proprietarios/<public_id>', methods=['GET'])
+def get_one_proprietarios(public_id: str):
+    prop = Proprietario.query.filter_by(public_id=public_id).first()
+
+    if not prop:
+        return jsonify({'message': 'Proprietario nao encontrado.'})
+
+    obj = {}
+    obj = proprietario_to_json(prop)
+    return jsonify({'proprietario': obj})
+
 @app.route('/proprietarios', methods=['POST'])
 def create_proprietario():
     data = request.get_json()
