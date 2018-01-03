@@ -126,6 +126,19 @@ def delete_veiculo(public_id: str):
     db.session.commit()
     return jsonify({'message': 'Veiculo deletado'})
 
+@app.route('/proprietarios', methods=['GET'])
+def get_all_proprietarios():
+    proprietarios = Proprietario.query.all()
+    print(proprietarios)
+
+    output = []
+
+    for prop in proprietarios:
+        obj = {}
+        obj = proprietario_to_json(prop)
+        output.append(obj)
+    return jsonify({'proprietaraios': output})
+
 # Retorna todas as DPs
 @app.route('/dps', methods=['GET'])
 def get_all_dps():
