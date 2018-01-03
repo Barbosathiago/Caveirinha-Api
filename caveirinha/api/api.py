@@ -374,11 +374,27 @@ def json_to_dp(data: {}, _uuid: str):
     dp = Dp()
 
     dp.nome = data['nome']
-    if((_uuid != None) or (_uuid == 'null')):
+    if((_uuid != None)):
         dp.public_id=_uuid
     return dp
 
+# Traduz um Proprietario para JSON
+def proprietario_to_json(prop: Proprietario):
+    obj = {}
+    obj['public_id'] = prop.public_id
+    obj['nome'] = prop.nome
+    obj['contato'] = prop.contato
+    return obj
 
+# Traduz um JSON para um Proprietário
+def json_to_proprietario(data: {}, _uuid: str):
+    prop = Proprietario()
+
+    prop.nome = data['nome']
+    prop.contato = data['contato']
+    if((_uuid!= None)):
+        prop.public_id = _uuid
+    return prop
 
 if __name__ == '__main__':
     app.run(debug=True)
