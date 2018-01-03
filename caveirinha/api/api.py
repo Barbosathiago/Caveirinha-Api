@@ -139,6 +139,15 @@ def get_all_proprietarios():
         output.append(obj)
     return jsonify({'proprietaraios': output})
 
+@app.route('/proprietarios', methods=['POST'])
+def create_proprietario():
+    data = request.get_json()
+    new_prop = Proprietario()
+    new_prop = json_to_proprietario(data, str(uuid.uuid4()))
+    db.session.add(new_prop)
+    db.session.flush()
+    db.session.commit()
+    return jsonify({'message': 'Proprietario registrado!', 'public_id': new_prop.public_id})
 # Retorna todas as DPs
 @app.route('/dps', methods=['GET'])
 def get_all_dps():
