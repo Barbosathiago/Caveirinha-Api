@@ -163,6 +163,17 @@ def update_proprietario(public_id: str):
     db.session.commit()
     return jsonify({'message': 'Proprietario atualizado!'})
 
+@app.route('/proprietarios/<public_id>', methods=['DELETE'])
+def delete_proprietario(public_id):
+    data = request.get_json()
+    prop = Proprietario.query.filter_by(public_id=public_id).first()
+
+    if not prop:
+        return jsonify({'message': 'Proprietario nao encontrado.'})
+    db.session.delete(prop)
+    db.session.commit()
+    return jsonify({'message': 'Proprietario deletado'})
+
 # Retorna todas as DPs
 @app.route('/dps', methods=['GET'])
 def get_all_dps():
