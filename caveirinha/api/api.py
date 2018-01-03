@@ -84,6 +84,12 @@ def get_one_veiculo(public_id: str):
 @app.route('/veiculos', methods=['POST'])
 def create_veiculo():
     data = request.get_json()
+    print(data['proprietario']['public_id'])
+    proprietario = Proprietario.query.filter_by(public_id=data['proprietario']['public_id']).first()
+    if not proprietario:
+        return jsonify({'message': 'Proprietário nao especificado!'})
+
+    data['proprietario_id'] = proprietario.id
     new_veiculo = Veiculo()
     new_veiculo = json_to_veiculo(data,str(uuid.uuid4()))
     db.session.add(new_veiculo)
