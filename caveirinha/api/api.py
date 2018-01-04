@@ -49,7 +49,7 @@ class Ocorrencia(db.Model):
     localOcorrencia = db.Column(db.String(450))
     dp_id = db.Column(db.Integer, db.ForeignKey('dp.id'), nullable=False)
     dp = db.relationship('Dp', uselist=False, backref=db.backref('ocorrencias', lazy=True))
-    tipoOcorrencia = db.Column(db.String(50))
+    tipo = db.Column(db.String(50))
     observacoes = db.Column(db.String(450))
     situacao = db.Column(db.String(50))
     veiculo_id = db.Column(db.Integer, db.ForeignKey('veiculo.id'), nullable=False)
@@ -322,12 +322,12 @@ def update_ocorrencia(public_id: str):
 
     if not oc:
         return jsonify({'message': 'Ocorrencia nao encontrada'})
-    oc.tipoOcorrencia = ocorrencia['tipoOcorrencia']
+    oc.tipo = ocorrencia['tipo']
     oc.situacao = ocorrencia['situacao']
     oc.numeroOcorrencia = ocorrencia['numeroOcorrencia']
     oc.localOcorrencia = ocorrencia['localOcorrencia']
     oc.data = datetime.strptime(ocorrencia['data'],'%Y-%m-%d').date()
-    oc.observacoes = data['observacoes']
+    oc.observacoes = ocorrencia['observacoes']
     oc.veiculo_id = veiculo.id
     oc.dp_id = dp.id
     db.session.flush()
@@ -343,10 +343,10 @@ def ocorrencia_to_json(ocorrencia:Ocorrencia, veiculo:Veiculo, dp: Dp):
     obj = {}
     obj['public_id'] = ocorrencia.public_id
     obj['dp'] = dp_to_json(dp)
-    obj['tipoOcorrencia'] = ocorrencia.tipoOcorrencia
+    obj['tipo'] = ocorrencia.tipo
     obj['situacao'] = ocorrencia.situacao
     obj['veiculo'] = veiculo_to_json(veiculo)
-    obj['data']= ocorrencia.data
+    obj['data']=  ocorrencia.data.strftime('%Y-%m-%d')
     obj['numeroOcorrencia'] = ocorrencia.numeroOcorrencia
     obj['localOcorrencia'] = ocorrencia.localOcorrencia
     obj['observacoes'] = ocorrencia.observacoes
@@ -356,12 +356,12 @@ def ocorrencia_to_json(ocorrencia:Ocorrencia, veiculo:Veiculo, dp: Dp):
 def json_to_ocorrencia(ocorrencia: {}, _uuid:str):
     obj = Ocorrencia()
 
-    obj.tipoOcorrencia = ocorrencia['tipoOcorrencia']
+    obj.tipo = ocorrencia['tipo']
     obj.situacao = ocorrencia['situacao']
     obj.veiculo_id = ocorrencia['veiculo_id']
     obj.dp_id = ocorrencia['dp_id']
     obj.numeroOcorrencia = ocorrencia['numeroOcorrencia']
-    localOcorrencia = ocorrencia['localOcorrencia']
+    obj.localOcorrencia = ocorrencia['localOcorrencia']
     obj.data = datetime.strptime(ocorrencia['data'],'%Y-%m-%d').date()
     obj.observacoes = ocorrencia['observacoes']
 
