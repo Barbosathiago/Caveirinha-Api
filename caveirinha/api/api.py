@@ -134,7 +134,12 @@ def delete_veiculo(public_id: str):
 
 @app.route('/proprietarios', methods=['GET'])
 def get_all_proprietarios():
-    proprietarios = Proprietario.query.all()
+    proprietarios = []
+    nome = request.args.get('nome')
+    if not nome:
+        nome = ''
+    proprietarios = Proprietario.query.filter(Proprietario.nome.like("%"+nome+"%"))
+    # proprietarios = Proprietario.query.all()
     print(proprietarios)
 
     output = []
