@@ -148,7 +148,7 @@ def get_all_proprietarios():
         obj = {}
         obj = proprietario_to_json(prop)
         output.append(obj)
-    return jsonify({'proprietaraios': output})
+    return jsonify({'proprietarios': output})
 
 @app.route('/proprietarios/<public_id>', methods=['GET'])
 def get_one_proprietarios(public_id: str):
@@ -267,7 +267,8 @@ def get_all_ocorrencias():
         filter(Veiculo.numeroMotor.like("%"+numeroMotor+"%")).\
         filter(Veiculo.chassis.like("%"+chassis+"%"))
     else:
-        ocorrencias = db.session.query(Ocorrencia).join(Veiculo, Ocorrencia.veiculo).\
+        ocorrencias = db.session.query(Ocorrencia).\
+        join(Veiculo, Ocorrencia.veiculo).\
         filter(Veiculo.placa.like("%"+placa+"%")).\
         filter(Veiculo.numeroMotor.like("%"+numeroMotor+"%")).\
         filter(Veiculo.chassis.like("%"+chassis+"%")).\
